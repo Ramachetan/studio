@@ -54,11 +54,26 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
   const copySummaryToClipboard = () => {
     let summaryText = `SplitSmart Summary\n====================\n\n`;
     people.forEach(person => {
-      const personTotal = totals[person.id]?.total || 0;
-      summaryText += `${person.emoji} ${person.name}: ${formatCurrency(personTotal)}\n`;
+      const personTotals = totals[person.id];
+      if (!personTotals) return;
+
+      summaryText += `${person.emoji} ${person.name} owes ${formatCurrency(personTotals.total)}\n`;
+      
+      personTotals.items.forEach(item => {
+        summaryText += `  - ${item.name}: ${formatCurrency(item.price)}\n`;
+      });
+      
+      const subtotal = personTotals.items.reduce((acc, item) => acc + item.price, 0);
+      const taxShare = personTotals.total - subtotal;
+      if (taxShare > 0.005) { // Check if tax share is meaningful
+          summaryText += `  - Share of Tax: ${formatCurrency(taxShare)}\n`;
+      }
+      summaryText += `\n`;
     });
-    summaryText += `\nTax: ${formatCurrency(tax)}\n`;
-    summaryText += `--------------------\n`;
+    
+    summaryText += `\n--------------------\n`;
+    summaryText += `Subtotal: ${formatCurrency(calculatedSubtotal)}\n`;
+    summaryText += `Tax: ${formatCurrency(tax)}\n`;
     summaryText += `Total: ${formatCurrency(receiptTotal)}\n`;
 
     navigator.clipboard.writeText(summaryText).then(() => {
