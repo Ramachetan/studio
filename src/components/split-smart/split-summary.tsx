@@ -30,9 +30,24 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   };
 
-  const calculatedTotal = useMemo(() => {
-    return Object.values(totals).reduce((acc, personTotal) => acc + personTotal.total, 0);
+  const calculatedSubtotal = useMemo(() => {
+    return Object.values(totals).reduce((acc, personTotal) => acc + personTotal.items.reduce((itemAcc, item) => itemAcc + item.price, 0), 0);
   }, [totals]);
+
+  const calculatedTotal = useMemo(() => {
+    const totalTax = tax || 0;
+    const itemsTotal = Object.values(totals).reduce((acc, personTotal) => acc + personTotal.total, 0);
+    // The total from `totals` already includes tax, so we need to be careful.
+    // Let's recalculate from subtotal + tax
+    const sub = Object.values(totals).reduce((acc, personTotal) => {
+        return acc + personTotal.items.reduce((iacc, i) => iacc + i.price, 0);
+    }, 0);
+    
+    const assignedItemsTotal = Object.values(totals).reduce((acc, personTotal) => acc + personTotal.total, 0);
+    return assignedItemsTotal;
+
+
+  }, [totals, tax, people]);
 
   const difference = useMemo(() => receiptTotal - calculatedTotal, [receiptTotal, calculatedTotal]);
 
@@ -69,7 +84,7 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible className="w-full" defaultValue={people[0]?.id}>
             {people.map(person => (
                 <AccordionItem value={person.id} key={person.id}>
                     <AccordionTrigger>
@@ -95,7 +110,7 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
                          {tax > 0 && people.length > 0 && (
                             <div className="flex justify-between pt-2 border-t">
                                 <span>Share of Tax</span>
-                                <span>{formatCurrency(tax / people.length)}</span>
+                                <span>{formatCurrency(totals[person.id].total - totals[person.id].items.reduce((acc, i) => acc + i.price, 0))}</span>
                             </div>
                         )}
                     </AccordionContent>
@@ -108,7 +123,7 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
         <div className="space-y-2 text-sm">
             <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal (Items)</span>
-                <span>{formatCurrency(calculatedTotal - (tax > 0 && people.length > 0 ? (tax/people.length)*people.length : 0))}</span>
+                <span>{formatCurrency(calculatedSubtotal)}</span>
             </div>
             <div className="flex justify-between">
                 <span className="text-muted-foreground">Tax</span>
@@ -124,7 +139,7 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
             </div>
             {Math.abs(difference) > 0.01 && (
                 <div className="flex justify-between pt-1">
-                    <Badge variant={difference > 0 ? "outline" : "destructive"}>
+                    <Badge variant={difference < 0 ? "outline" : "destructive"}>
                         Difference: {formatCurrency(difference)}
                     </Badge>
                 </div>

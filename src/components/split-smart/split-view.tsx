@@ -16,11 +16,16 @@ interface SplitViewProps {
 
 export function SplitView({ receipt }: SplitViewProps) {
   const [people, setPeople] = useState<Person[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [assignments, setAssignments] = useState<Assignments>({});
 
-  const items: Item[] = useMemo(() => 
-    receipt.items.map((item, index) => ({ ...item, id: `item-${index}` }))
-  , [receipt.items]);
+  useEffect(() => {
+    const initialItems = receipt.items.map((item, index) => ({
+      ...item,
+      id: `item-${index}`,
+    }));
+    setItems(initialItems);
+  }, [receipt.items]);
 
   useEffect(() => {
     // Initialize with a default person "Me"
@@ -39,6 +44,14 @@ export function SplitView({ receipt }: SplitViewProps) {
       
       return { ...prev, [itemId]: newAssignees };
     });
+  };
+
+  const handleItemUpdate = (itemId: string, newName: string, newPrice: number) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, name: newName, price: newPrice } : item
+      )
+    );
   };
 
   const totals = useMemo<Totals>(() => {
@@ -72,6 +85,10 @@ export function SplitView({ receipt }: SplitViewProps) {
     return newTotals;
   }, [assignments, items, people, receipt.tax]);
 
+  const receiptTotal = useMemo(() => {
+    return items.reduce((sum, item) => sum + item.price, 0) + receipt.tax;
+  }, [items, receipt.tax])
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
       <div className="lg:col-span-2">
@@ -97,6 +114,7 @@ export function SplitView({ receipt }: SplitViewProps) {
                         people={people}
                         assignments={assignments[item.id] || []}
                         onAssignmentChange={handleAssignmentChange}
+                        onItemUpdate={handleItemUpdate}
                     />
                 </motion.div>
               ))}
@@ -110,7 +128,7 @@ export function SplitView({ receipt }: SplitViewProps) {
                 people={people} 
                 totals={totals}
                 tax={receipt.tax}
-                receiptTotal={receipt.total}
+                receiptTotal={receiptTotal}
             />
         </div>
       </div>
