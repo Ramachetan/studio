@@ -90,7 +90,6 @@ export function PeopleManager({ people, setPeople }: PeopleManagerProps) {
                                   <div className={`w-full h-full flex items-center justify-center text-xl`}>
                                       {person.emoji}
                                   </div>
-                                  <AvatarFallback>{person.name.charAt(0).toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <span className="text-xs text-muted-foreground">{person.name}</span>
                             </button>
