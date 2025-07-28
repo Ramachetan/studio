@@ -40,7 +40,7 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
     let summaryText = `SplitSmart Summary\n====================\n\n`;
     people.forEach(person => {
       const personTotal = totals[person.id]?.total || 0;
-      summaryText += `${person.name}: ${formatCurrency(personTotal)}\n`;
+      summaryText += `${person.emoji} ${person.name}: ${formatCurrency(personTotal)}\n`;
     });
     summaryText += `\nTax: ${formatCurrency(tax)}\n`;
     summaryText += `--------------------\n`;
@@ -76,8 +76,8 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
                         <div className="flex items-center justify-between w-full pr-4">
                             <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8">
-                                    <div className={`w-full h-full flex items-center justify-center text-primary-foreground text-xs ${person.color}`}>
-                                    {person.name.charAt(0).toUpperCase()}
+                                    <div className={`w-full h-full flex items-center justify-center text-xl`}>
+                                      {person.emoji}
                                     </div>
                                 </Avatar>
                                 <span className="font-medium">{person.name}</span>

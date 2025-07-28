@@ -7,13 +7,20 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getNextColor } from '@/lib/colors';
+import { getNextEmoji } from '@/lib/person-emojis';
 import type { Person } from '@/lib/types';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { PERSON_EMOJIS } from '@/lib/person-emojis';
 
 interface PeopleManagerProps {
   people: Person[];
@@ -30,6 +37,7 @@ export function PeopleManager({ people, setPeople }: PeopleManagerProps) {
         id: `person-${Date.now()}`,
         name: name.trim(),
         color: getNextColor(people.length),
+        emoji: getNextEmoji(people.length),
       };
       setPeople(prev => [...prev, newPerson]);
       setName('');
@@ -40,6 +48,10 @@ export function PeopleManager({ people, setPeople }: PeopleManagerProps) {
     // Cannot remove the first person ("Me")
     if (people.length > 0 && people[0].id === id) return;
     setPeople(prev => prev.filter(p => p.id !== id));
+  };
+
+  const updatePersonEmoji = (id: string, emoji: string) => {
+    setPeople(prev => prev.map(p => p.id === id ? { ...p, emoji } : p));
   };
   
   return (
@@ -69,19 +81,35 @@ export function PeopleManager({ people, setPeople }: PeopleManagerProps) {
                 exit={{ opacity: 0, scale: 0.5 }}
                 className="relative group"
               >
-                <Tooltip>
-                    <TooltipTrigger>
-                        <Avatar>
-                            <div className={`w-full h-full flex items-center justify-center text-primary-foreground ${person.color}`}>
-                                {person.name.charAt(0).toUpperCase()}
-                            </div>
-                            <AvatarFallback>{person.name.charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{person.name}</p>
-                    </TooltipContent>
-                </Tooltip>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="flex flex-col items-center gap-1 focus:outline-none">
+                              <Avatar>
+                                  <div className={`w-full h-full flex items-center justify-center text-xl`}>
+                                      {person.emoji}
+                                  </div>
+                                  <AvatarFallback>{person.name.charAt(0).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-xs text-muted-foreground">{person.name}</span>
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Click to change emoji</p>
+                        </TooltipContent>
+                    </Tooltip>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
+                    <div className="grid grid-cols-6 gap-1">
+                      {PERSON_EMOJIS.map(emoji => (
+                        <button key={emoji} onClick={() => updatePersonEmoji(person.id, emoji)} className="text-2xl p-1 rounded-md hover:bg-accent/50 transition-colors">
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
 
                 {index > 0 && ( // Do not allow removing the first person
                   <button

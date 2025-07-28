@@ -8,6 +8,7 @@ import { SplitSummary } from './split-summary';
 import type { ParseReceiptOutput } from '@/ai/flows/parse-receipt';
 import type { Item, Person, Assignments, Totals } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { getNextEmoji } from '@/lib/person-emojis';
 
 interface SplitViewProps {
   receipt: ParseReceiptOutput;
@@ -24,7 +25,7 @@ export function SplitView({ receipt }: SplitViewProps) {
   useEffect(() => {
     // Initialize with a default person "Me"
     if (people.length === 0) {
-      setPeople([{ id: `person-${Date.now()}`, name: 'Me', color: 'bg-primary' }]);
+      setPeople([{ id: `person-${Date.now()}`, name: 'Me', color: 'bg-primary', emoji: getNextEmoji(0) }]);
     }
   }, [people.length]);
 

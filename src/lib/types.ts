@@ -8,6 +8,7 @@ export interface Person {
   id: string;
   name: string;
   color: string;
+  emoji: string;
 }
 
 export interface Assignments {

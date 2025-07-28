@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Item, Person } from '@/lib/types';
@@ -41,7 +40,7 @@ export function ItemCard({ item, people, assignments, onAssignmentChange }: Item
                 {formatCurrency(item.price)}
             </Badge>
 
-            <div className="flex -space-x-2">
+            <div className="flex space-x-2">
                 {people.map(person => (
                 <Tooltip key={person.id}>
                     <TooltipTrigger asChild>
@@ -50,16 +49,18 @@ export function ItemCard({ item, people, assignments, onAssignmentChange }: Item
                         whileTap={{ scale: 0.9 }}
                         onClick={() => onAssignmentChange(item.id, person.id)}
                         aria-label={`Assign to ${person.name}`}
+                        className={cn(
+                            'flex flex-col items-center gap-1 p-1 rounded-md transition-all',
+                            assignments.includes(person.id) ? 'bg-accent/20' : 'opacity-50 hover:opacity-100'
+                        )}
                     >
-                        <Avatar className={cn(
-                            'h-8 w-8 border-2 transition-all',
-                            assignments.includes(person.id) ? 'border-accent' : 'border-transparent opacity-50 hover:opacity-100'
+                        <div className={cn(
+                            'h-8 w-8 border-2 rounded-full flex items-center justify-center text-lg',
+                            assignments.includes(person.id) ? 'border-accent' : 'border-transparent'
                         )}>
-                        <div className={`w-full h-full flex items-center justify-center text-primary-foreground text-xs ${person.color}`}>
-                            {person.name.charAt(0).toUpperCase()}
+                            <span>{person.emoji}</span>
                         </div>
-                        <AvatarFallback>{person.name.charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <span className="text-xs text-muted-foreground">{person.name}</span>
                     </motion.button>
                     </TooltipTrigger>
                     <TooltipContent>
