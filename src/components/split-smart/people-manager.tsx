@@ -1,0 +1,102 @@
+'use client';
+
+import { useState } from 'react';
+import { Plus, User, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AnimatePresence, motion } from 'framer-motion';
+import { getNextColor } from '@/lib/colors';
+import type { Person } from '@/lib/types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+interface PeopleManagerProps {
+  people: Person[];
+  setPeople: React.Dispatch<React.SetStateAction<Person[]>>;
+}
+
+export function PeopleManager({ people, setPeople }: PeopleManagerProps) {
+  const [name, setName] = useState('');
+
+  const addPerson = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim() && people.length < 10) {
+      const newPerson: Person = {
+        id: `person-${Date.now()}`,
+        name: name.trim(),
+        color: getNextColor(people.length),
+      };
+      setPeople(prev => [...prev, newPerson]);
+      setName('');
+    }
+  };
+
+  const removePerson = (id: string) => {
+    // Cannot remove the first person ("Me")
+    if (people.length > 0 && people[0].id === id) return;
+    setPeople(prev => prev.filter(p => p.id !== id));
+  };
+  
+  return (
+    <TooltipProvider>
+      <div className="space-y-4">
+        <form onSubmit={addPerson} className="flex items-center gap-2">
+          <User className="h-5 w-5 text-muted-foreground" />
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Add a person's name"
+            className="flex-grow"
+            aria-label="Add a new person's name"
+          />
+          <Button type="submit" size="icon" aria-label="Add person">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </form>
+        <div className="flex flex-wrap gap-3">
+          <AnimatePresence>
+            {people.map((person, index) => (
+              <motion.div
+                key={person.id}
+                layout
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1, transition: { delay: index * 0.1 } }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="relative group"
+              >
+                <Tooltip>
+                    <TooltipTrigger>
+                        <Avatar>
+                            <div className={`w-full h-full flex items-center justify-center text-primary-foreground ${person.color}`}>
+                                {person.name.charAt(0).toUpperCase()}
+                            </div>
+                            <AvatarFallback>{person.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{person.name}</p>
+                    </TooltipContent>
+                </Tooltip>
+
+                {index > 0 && ( // Do not allow removing the first person
+                  <button
+                    onClick={() => removePerson(person.id)}
+                    className="absolute -top-1 -right-1 bg-secondary rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Remove ${person.name}`}
+                  >
+                    <X className="h-3 w-3 text-secondary-foreground" />
+                  </button>
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}
