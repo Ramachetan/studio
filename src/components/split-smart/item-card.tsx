@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/tooltip"
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Pencil, Save } from 'lucide-react';
+import { Pencil, Save, Trash2 } from 'lucide-react';
 
 interface ItemCardProps {
   item: Item;
@@ -22,9 +22,10 @@ interface ItemCardProps {
   assignments: string[];
   onAssignmentChange: (itemId: string, personId: string) => void;
   onItemUpdate: (itemId: string, newName: string, newPrice: number) => void;
+  onItemDelete: (itemId: string) => void;
 }
 
-export function ItemCard({ item, people, assignments, onAssignmentChange, onItemUpdate }: ItemCardProps) {
+export function ItemCard({ item, people, assignments, onAssignmentChange, onItemUpdate, onItemDelete }: ItemCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(item.name);
   const [editedPrice, setEditedPrice] = useState(item.price.toFixed(2));
@@ -35,7 +36,7 @@ export function ItemCard({ item, people, assignments, onAssignmentChange, onItem
 
   const handleSave = () => {
     const newPrice = parseFloat(editedPrice);
-    if (editedName.trim() && !isNaN(newPrice) && newPrice >= 0) {
+    if (editedName.trim() && !isNaN(newPrice)) {
       onItemUpdate(item.id, editedName.trim(), newPrice);
       setIsEditing(false);
     }
@@ -115,6 +116,9 @@ export function ItemCard({ item, people, assignments, onAssignmentChange, onItem
                   </div>
                   <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditing(true)} aria-label="Edit item">
                       <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => onItemDelete(item.id)} aria-label="Delete item">
+                      <Trash2 className="h-4 w-4" />
                   </Button>
                 </>
               )}

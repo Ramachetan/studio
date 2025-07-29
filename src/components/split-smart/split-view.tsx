@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PeopleManager } from './people-manager';
 import { ItemCard } from './item-card';
+import { AddItemForm } from './add-item-form';
 import { SplitSummary } from './split-summary';
 import type { ParseReceiptOutput } from '@/ai/flows/parse-receipt';
 import type { Item, Person, Assignments, Totals } from '@/lib/types';
@@ -55,6 +56,20 @@ export function SplitView({ receipt, receiptImage }: SplitViewProps) {
     );
   };
 
+  const handleAddItem = (name: string, price: number) => {
+    const newItem: Item = {
+      id: `item-${Date.now()}`,
+      name,
+      price,
+      quantity: 1,
+    };
+    setItems(prevItems => [...prevItems, newItem]);
+  };
+
+  const handleItemDelete = (itemId: string) => {
+    setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+  };
+
   const totals = useMemo<Totals>(() => {
     const newTotals: Totals = {};
     people.forEach(p => {
@@ -98,6 +113,10 @@ export function SplitView({ receipt, receiptImage }: SplitViewProps) {
             <PeopleManager people={people} setPeople={setPeople} />
           </CardContent>
         </Card>
+
+        <div className="mb-6">
+          <AddItemForm onAddItem={handleAddItem} />
+        </div>
         
         <h2 className="text-xl font-semibold mb-4 text-foreground">Tap to Assign Items</h2>
         <div className="space-y-3">
@@ -116,6 +135,7 @@ export function SplitView({ receipt, receiptImage }: SplitViewProps) {
                         assignments={assignments[item.id] || []}
                         onAssignmentChange={handleAssignmentChange}
                         onItemUpdate={handleItemUpdate}
+                        onItemDelete={handleItemDelete}
                     />
                 </motion.div>
               ))}
