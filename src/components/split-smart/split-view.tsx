@@ -12,9 +12,10 @@ import { getNextEmoji } from '@/lib/person-emojis';
 
 interface SplitViewProps {
   receipt: ParseReceiptOutput;
+  receiptImage?: string | null;
 }
 
-export function SplitView({ receipt }: SplitViewProps) {
+export function SplitView({ receipt, receiptImage }: SplitViewProps) {
   const [people, setPeople] = useState<Person[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [assignments, setAssignments] = useState<Assignments>({});
@@ -123,7 +124,21 @@ export function SplitView({ receipt }: SplitViewProps) {
       </div>
 
       <div className="lg:col-span-1">
-        <div className="sticky top-8">
+        <div className="sticky top-8 space-y-6">
+            {receiptImage && (
+              <Card className="shadow-md">
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-3 text-foreground">Original Receipt</h3>
+                  <div className="relative">
+                    <img 
+                      src={receiptImage} 
+                      alt="Uploaded receipt" 
+                      className="w-full h-auto rounded-lg border border-border"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <SplitSummary 
                 people={people} 
                 totals={totals}

@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { DEFAULT_PROMPT } from '@/lib/constants';
 
 const ParseReceiptInputSchema = z.object({
   receiptDataUri: z
@@ -17,6 +18,10 @@ const ParseReceiptInputSchema = z.object({
     .describe(
       "A photo of a receipt, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  customPrompt: z
+    .string()
+    .optional()
+    .describe("Optional custom prompt to use for parsing the receipt."),
 });
 export type ParseReceiptInput = z.infer<typeof ParseReceiptInputSchema>;
 
@@ -37,15 +42,11 @@ export async function parseReceipt(input: ParseReceiptInput): Promise<ParseRecei
   return parseReceiptFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const defaultPrompt = ai.definePrompt({
   name: 'parseReceiptPrompt',
   input: {schema: ParseReceiptInputSchema},
   output: {schema: ParseReceiptOutputSchema},
-  prompt: `You are an expert receipt parser. You will extract the items, quantities, prices, tax, and total from the receipt.
-
-  Return the data in JSON format.
-
-  Receipt: {{media url=receiptDataUri}}`,
+  prompt: DEFAULT_PROMPT,
 });
 
 const parseReceiptFlow = ai.defineFlow(
@@ -55,7 +56,19 @@ const parseReceiptFlow = ai.defineFlow(
     outputSchema: ParseReceiptOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    if (input.customPrompt) {
+      // Create a dynamic prompt for custom prompts
+      const customPrompt = ai.definePrompt({
+        name: 'customParseReceiptPrompt',
+        input: {schema: ParseReceiptInputSchema},
+        output: {schema: ParseReceiptOutputSchema},
+        prompt: input.customPrompt,
+      });
+      const {output} = await customPrompt(input);
+      return output!;
+    } else {
+      const {output} = await defaultPrompt(input);
+      return output!;
+    }
   }
 );

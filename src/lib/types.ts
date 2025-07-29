@@ -1,7 +1,10 @@
 import type { ParseReceiptOutput } from "@/ai/flows/parse-receipt";
 
-export interface Item extends NonNullable<ParseReceiptOutput['items']>[0] {
+export interface Item {
   id: string;
+  name: string;
+  quantity: number;
+  price: number;
 }
 
 export interface Person {

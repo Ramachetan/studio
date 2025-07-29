@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { parseReceipt, type ParseReceiptInput, type ParseReceiptOutput } from '@/ai/flows/parse-receipt';
 
 interface ReceiptUploaderProps {
-  onReceiptParsed: (data: ParseReceiptOutput) => void;
+  onReceiptParsed: (data: ParseReceiptOutput, imageUri?: string) => void;
   setIsLoading: (isLoading: boolean) => void;
   onError: (message: string) => void;
+  customPrompt?: string;
 }
 
 const sampleReceipt: ParseReceiptOutput = {
@@ -26,7 +27,7 @@ const sampleReceipt: ParseReceiptOutput = {
 };
 
 
-export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError }: ReceiptUploaderProps) {
+export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError, customPrompt }: ReceiptUploaderProps) {
   const [dragActive, setDragActive] = useState(false);
 
   const handleFile = useCallback(async (file: File) => {
@@ -43,9 +44,12 @@ export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError }: Rece
     reader.onload = async (e) => {
       const dataUri = e.target?.result as string;
       try {
-        const input: ParseReceiptInput = { receiptDataUri: dataUri };
+        const input: ParseReceiptInput = { 
+          receiptDataUri: dataUri,
+          customPrompt: customPrompt 
+        };
         const result = await parseReceipt(input);
-        onReceiptParsed(result);
+        onReceiptParsed(result, dataUri);
       } catch (error) {
         console.error(error);
         onError('Failed to parse the receipt. The AI may be unavailable or the image may be unreadable. Please try again.');
@@ -56,9 +60,19 @@ export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError }: Rece
         setIsLoading(false);
     }
     reader.readAsDataURL(file);
-  }, [onReceiptParsed, setIsLoading, onError]);
+  }, [onReceiptParsed, setIsLoading, onError, customPrompt]);
 
   const handleDrag = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleFormDrag = (e: DragEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -99,7 +113,7 @@ export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError }: Rece
         <CardDescription>Let AI do the hard work. Drag & drop or click to upload.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="form-file-upload" onDragEnter={handleDrag} onSubmit={(e) => e.preventDefault()}>
+        <form id="form-file-upload" onDragEnter={handleFormDrag} onSubmit={(e) => e.preventDefault()}>
           <label 
             htmlFor="input-file-upload" 
             className={`relative flex flex-col items-center justify-center w-full h-48 rounded-lg cursor-pointer transition-colors ${dragActive ? 'bg-primary/10' : 'bg-background hover:bg-muted'}`}
