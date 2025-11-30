@@ -56,21 +56,21 @@ export function PeopleManager({ people, setPeople }: PeopleManagerProps) {
   
   return (
     <TooltipProvider>
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <form onSubmit={addPerson} className="flex items-center gap-2">
-          <User className="h-5 w-5 text-muted-foreground" />
+          <User className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Add a person's name"
-            className="flex-grow"
+            placeholder="Add person"
+            className="flex-grow text-sm md:text-base h-9 md:h-10"
             aria-label="Add a new person's name"
           />
-          <Button type="submit" size="icon" aria-label="Add person">
+          <Button type="submit" size="icon" className="h-9 w-9 md:h-10 md:w-10 flex-shrink-0" aria-label="Add person">
             <Plus className="h-4 w-4" />
           </Button>
         </form>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 md:gap-3">
           <AnimatePresence>
             {people.map((person, index) => (
               <motion.div

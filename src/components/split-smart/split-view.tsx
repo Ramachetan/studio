@@ -105,28 +105,36 @@ export function SplitView({ receipt, receiptImage }: SplitViewProps) {
     return items.reduce((sum, item) => sum + item.price, 0) + receipt.tax;
   }, [items, receipt.tax])
 
+  // Separate discounts from regular items for display
+  const regularItems = items.filter(item => item.price >= 0);
+  const discountItems = items.filter(item => item.price < 0);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
-      <div className="lg:col-span-2">
-        <Card className="mb-6 shadow-md">
-          <CardContent className="p-4">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 w-full">
+      <div className="lg:col-span-2 space-y-4 md:space-y-6">
+        {/* People Manager */}
+        <Card className="shadow-md border-primary/10">
+          <CardContent className="p-3 md:p-4">
             <PeopleManager people={people} setPeople={setPeople} />
           </CardContent>
         </Card>
 
-        <div className="mb-6">
-          <AddItemForm onAddItem={handleAddItem} />
-        </div>
+        {/* Add Item Form */}
+        <AddItemForm onAddItem={handleAddItem} />
         
-        <h2 className="text-xl font-semibold mb-4 text-foreground">Tap to Assign Items</h2>
-        <div className="space-y-3">
+        {/* Regular Items Section */}
+        <div>
+          <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 text-foreground flex items-center gap-2">
+            <span>📝</span> Items ({regularItems.length})
+          </h2>
+          <div className="space-y-2 md:space-y-3">
             <AnimatePresence>
-              {items.map((item, index) => (
+              {regularItems.map((item, index) => (
                 <motion.div
                     key={item.id}
                     layout
                     initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0, transition: { delay: index * 0.05 } }}
+                    animate={{ opacity: 1, y: 0, transition: { delay: index * 0.03 } }}
                     exit={{ opacity: 0, scale: 0.95 }}
                 >
                     <ItemCard 
@@ -140,20 +148,55 @@ export function SplitView({ receipt, receiptImage }: SplitViewProps) {
                 </motion.div>
               ))}
             </AnimatePresence>
+          </div>
         </div>
+        
+        {/* Discounts Section */}
+        {discountItems.length > 0 && (
+          <div>
+            <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 text-green-700 dark:text-green-300 flex items-center gap-2">
+              <span>🏷️</span> Discounts & Savings ({discountItems.length})
+            </h2>
+            <div className="space-y-2 md:space-y-3">
+              <AnimatePresence>
+                {discountItems.map((item, index) => (
+                  <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0, transition: { delay: index * 0.03 } }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                      <ItemCard 
+                          item={item} 
+                          people={people}
+                          assignments={assignments[item.id] || []}
+                          onAssignmentChange={handleAssignmentChange}
+                          onItemUpdate={handleItemUpdate}
+                          onItemDelete={handleItemDelete}
+                      />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Summary Column - Fixed on mobile */}
       <div className="lg:col-span-1">
-        <div className="sticky top-8 space-y-6">
+        <div className="lg:sticky lg:top-4 space-y-4 md:space-y-6">
             {receiptImage && (
-              <Card className="shadow-md">
-                <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-3 text-foreground">Original Receipt</h3>
+              <Card className="shadow-md hidden lg:block">
+                <CardContent className="p-3 md:p-4">
+                  <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-foreground flex items-center gap-2">
+                    <span>🧾</span> Original Receipt
+                  </h3>
                   <div className="relative">
                     <img 
                       src={receiptImage} 
                       alt="Uploaded receipt" 
-                      className="w-full h-auto rounded-lg border border-border"
+                      className="w-full h-auto rounded-lg border border-border max-h-[300px] object-contain"
                     />
                   </div>
                 </CardContent>

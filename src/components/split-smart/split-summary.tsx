@@ -91,35 +91,35 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
   };
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Users className="h-5 w-5 text-primary" />
+    <Card className="shadow-lg border-primary/10">
+      <CardHeader className="pb-2 md:pb-4">
+        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+          <span className="text-xl">💰</span>
           <span>Bill Summary</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 md:space-y-4 px-3 md:px-6">
         <Accordion type="single" collapsible className="w-full" defaultValue={people[0]?.id}>
             {people.map(person => (
                 <AccordionItem value={person.id} key={person.id}>
-                    <AccordionTrigger>
-                        <div className="flex items-center justify-between w-full pr-4">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <div className={`w-full h-full flex items-center justify-center text-xl`}>
+                    <AccordionTrigger className="py-2 md:py-3">
+                        <div className="flex items-center justify-between w-full pr-2 md:pr-4">
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <Avatar className="h-7 w-7 md:h-8 md:w-8">
+                                    <div className={`w-full h-full flex items-center justify-center text-lg md:text-xl`}>
                                       {person.emoji}
                                     </div>
                                 </Avatar>
-                                <span className="font-medium">{person.name}</span>
+                                <span className="font-medium text-sm md:text-base">{person.name}</span>
                             </div>
-                            <span className="font-semibold text-primary">{formatCurrency(totals[person.id]?.total || 0)}</span>
+                            <span className="font-semibold text-sm md:text-base text-primary">{formatCurrency(totals[person.id]?.total || 0)}</span>
                         </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-2 space-y-1 text-sm text-muted-foreground">
+                    <AccordionContent className="px-1 md:px-2 space-y-1 text-xs md:text-sm text-muted-foreground">
                         {totals[person.id]?.items.map((item, index) => (
-                           <div key={index} className="flex justify-between">
-                             <span>{item.name}</span>
-                             <span>{formatCurrency(item.price)}</span>
+                           <div key={index} className={`flex justify-between ${item.price < 0 ? 'text-green-600 dark:text-green-400' : ''}`}>
+                             <span className="truncate pr-2">{item.name}</span>
+                             <span className="flex-shrink-0">{formatCurrency(item.price)}</span>
                            </div> 
                         ))}
                          {tax > 0 && people.length > 0 && (
@@ -161,10 +161,10 @@ export function SplitSummary({ people, totals, tax, receiptTotal }: SplitSummary
             )}
         </div>
       </CardContent>
-      <CardFooter>
-        <Button className="w-full bg-accent hover:bg-accent/90" onClick={copySummaryToClipboard}>
+      <CardFooter className="px-3 md:px-6 pb-4">
+        <Button className="w-full bg-accent hover:bg-accent/90 h-10 md:h-11 text-sm md:text-base" onClick={copySummaryToClipboard}>
           <Copy className="mr-2 h-4 w-4" />
-          Copy & Share Summary
+          Share Summary
         </Button>
       </CardFooter>
     </Card>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, type ChangeEvent, type DragEvent } from 'react';
-import { UploadCloud } from 'lucide-react';
+import { useState, useCallback, useRef, type ChangeEvent, type DragEvent } from 'react';
+import { UploadCloud, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { parseReceipt, type ParseReceiptInput, type ParseReceiptOutput } from '@/ai/flows/parse-receipt';
@@ -21,14 +21,18 @@ const sampleReceipt: ParseReceiptOutput = {
     { name: 'Orange Juice', quantity: 1, price: 5.00 },
     { name: 'Breakfast Burrito', quantity: 1, price: 14.75 },
     { name: 'Side of Bacon', quantity: 1, price: 4.00 },
+    { name: 'Member Discount', quantity: 1, price: -3.50 },
+    { name: 'Weekend Special', quantity: 1, price: -2.00 },
   ],
-  tax: 3.75,
-  total: 52.75,
+  tax: 3.28,
+  total: 49.28,
 };
 
 
 export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError, customPrompt }: ReceiptUploaderProps) {
   const [dragActive, setDragActive] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file) return;
@@ -106,30 +110,81 @@ export function ReceiptUploader({ onReceiptParsed, setIsLoading, onError, custom
     }, 800);
   };
 
+  const handleTakePhoto = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <Card className="w-full max-w-2xl mx-auto text-center shadow-lg border-2 border-dashed border-primary/20 hover:border-primary/50 transition-colors duration-300">
-      <CardHeader>
-        <CardTitle>Upload Your Receipt</CardTitle>
-        <CardDescription>Let AI do the hard work. Drag & drop or click to upload.</CardDescription>
+    <Card className="w-full max-w-2xl mx-auto text-center shadow-xl border-0 bg-gradient-to-br from-card to-secondary/20">
+      <CardHeader className="pb-2 md:pb-4">
+        <CardTitle className="text-xl md:text-2xl">📷 Upload Your Receipt</CardTitle>
+        <CardDescription className="text-sm md:text-base">Let AI do the hard work. Supports Costco, warehouse stores & more!</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 pb-6">
         <form id="form-file-upload" onDragEnter={handleFormDrag} onSubmit={(e) => e.preventDefault()}>
-          <label 
-            htmlFor="input-file-upload" 
-            className={`relative flex flex-col items-center justify-center w-full h-48 rounded-lg cursor-pointer transition-colors ${dragActive ? 'bg-primary/10' : 'bg-background hover:bg-muted'}`}
+          <div 
+            className={`relative flex flex-col items-center justify-center w-full h-40 md:h-48 rounded-xl transition-all duration-300 border-2 border-dashed ${dragActive ? 'bg-primary/10 border-primary scale-[1.02]' : 'bg-background/50 border-primary/30 hover:border-primary/60 hover:bg-muted/50'}`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
           >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <UploadCloud className="w-10 h-10 mb-3 text-primary/80" />
-              <p className="mb-2 text-sm text-muted-foreground">
-                <span className="font-semibold">Click to upload</span> or drag and drop
+            <div className="flex flex-col items-center justify-center py-4">
+              <div className="flex gap-3 mb-4">
+                <Button 
+                  type="button"
+                  variant="default" 
+                  size="lg"
+                  className="flex items-center gap-2"
+                  onClick={handleTakePhoto}
+                >
+                  <Camera className="w-5 h-5" />
+                  <span>Take Photo</span>
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="lg"
+                  className="flex items-center gap-2"
+                  onClick={handleUploadClick}
+                >
+                  <UploadCloud className="w-5 h-5" />
+                  <span>Upload</span>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <span className="hidden md:inline">or drag and drop • </span>PNG, JPG, HEIC, or PDF
               </p>
-              <p className="text-xs text-muted-foreground">PNG, JPG, or GIF</p>
             </div>
-            <input id="input-file-upload" type="file" className="hidden" accept="image/*" onChange={handleChange} />
-          </label>
-           {dragActive && <div className="absolute inset-0 w-full h-full" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}></div>}
+            {/* Hidden input for camera capture */}
+            <input 
+              ref={cameraInputRef}
+              type="file" 
+              className="hidden" 
+              accept="image/*" 
+              capture="environment" 
+              onChange={handleChange} 
+            />
+            {/* Hidden input for file upload */}
+            <input 
+              ref={fileInputRef}
+              type="file" 
+              className="hidden" 
+              accept="image/*,.pdf" 
+              onChange={handleChange} 
+            />
+          </div>
         </form>
-         <Button variant="link" className="mt-4" onClick={handleSampleReceipt}>Or try with a sample receipt</Button>
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <p className="text-xs text-muted-foreground">✨ Handles discounts, coupons & negative values</p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={handleSampleReceipt}>
+            Try with sample receipt
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
