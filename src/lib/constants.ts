@@ -10,24 +10,36 @@ export const DEFAULT_PROMPT = `You are an expert receipt parser. Parse the recei
 
 **Example 1 - Costco Receipt:**
 \`\`\`
-KIRKLAND WATER 24PK     4.99
-  INSTANT SAVINGS      -1.00
-ROTISSERIE CHICKEN      4.99
-ORGANIC BANANAS 2.5LB   3.49
-TAX                     0.65
-TOTAL                  13.12
+HVR HOMESTYL     $9.99
+5354 HVR HOMESTYL     $13.49
+1321637 KS SS/BF LAS     $13.49
+1321637 KS SS/BF LAS     $13.49
+1321637 KS SS/BF LAS     $13.49
+782294 POWER GREENS     $5.99
+782294 POWER GREENS     $5.99
+1394091 CNTRY FRNCH     $5.99
+1394091 CAPRI SUN     $6.99
+SUBTOTAL                $75.42
+TAX                     $2.13
+TOTAL                   $77.55
 \`\`\`
 Output:
 {
   "items": [
-    {"name": "KIRKLAND WATER 24PK", "quantity": 1, "price": 4.99},
-    {"name": "INSTANT SAVINGS", "quantity": 1, "price": -1.00},
-    {"name": "ROTISSERIE CHICKEN", "quantity": 1, "price": 4.99},
-    {"name": "ORGANIC BANANAS 2.5LB", "quantity": 1, "price": 3.49}
+    {"name": "HVR HOMESTYL", "quantity": 1, "price": 9.99},
+    {"name": "5354 HVR HOMESTYL", "quantity": 1, "price": 13.49},
+    {"name": "1321637 KS SS/BF LAS", "quantity": 1, "price": 13.49},
+    {"name": "1321637 KS SS/BF LAS", "quantity": 1, "price": 13.49},
+    {"name": "1321637 KS SS/BF LAS", "quantity": 1, "price": 13.49},
+    {"name": "782294 POWER GREENS", "quantity": 1, "price": 5.99},
+    {"name": "782294 POWER GREENS", "quantity": 1, "price": 5.99},
+    {"name": "1394091 CAPRI SUN", "quantity": 1, "price": 6.99},
+    {"name": "1394091 CNTRY FRNCH", "quantity": 1, "price": 5.99}
   ],
-  "tax": 0.65,
-  "total": 13.12
+  "tax": 2.13,
+  "total": 77.55
 }
+
 
 **Example 2 - Restaurant Receipt:**
 \`\`\`

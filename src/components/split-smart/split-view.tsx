@@ -187,7 +187,7 @@ export function SplitView({ receipt, receiptImage }: SplitViewProps) {
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-4 space-y-4 md:space-y-6">
             {receiptImage && (
-              <Card className="shadow-md hidden lg:block">
+              <Card className="shadow-md">
                 <CardContent className="p-3 md:p-4">
                   <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-foreground flex items-center gap-2">
                     <span>🧾</span> Original Receipt
